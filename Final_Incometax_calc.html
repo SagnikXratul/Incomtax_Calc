@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Income Tax Calculator</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 900px;
+      margin: 25px auto;
+      padding: 20px;
+      background: #f5f7fa;
+    }
+    h1, h2 {
+      text-align: center;
+      color: #222;
+    }
+    .form-section {
+      background: white;
+      padding: 20px 25px;
+      border-radius: 12px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+      margin-bottom: 25px;
+      display: none;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: 600;
+      color: #333;
+    }
+    input[type=number], select {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: 1.5px solid #ccc;
+      margin-top: 6px;
+    }
+    .checkbox-group {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .checkbox-group label {
+      display: inline-block;
+      margin: 0 20px 0 0;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    button {
+      display: inline-block;
+      margin: 20px 10px 40px;
+      padding: 14px 30px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: white;
+      background-color: #007BFF;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .result {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      white-space: pre-wrap;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 1rem;
+      line-height: 1.5;
+      color: #222;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Income Tax Calculator</h1>
+<h2>Select Income Sources</h2>
+
+<form id="taxForm">
+
+  <div class="checkbox-group">
+    <label><input type="checkbox" id="useSalary" checked> Salary Income</label>
+    <label><input type="checkbox" id="useFreelance"> Freelance / Business Income</label>
+    <label><input type="checkbox" id="useOther"> Other Income</label>
+  </div>
+
+  <!-- Salary Form -->
+  <div id="salaryForm" class="form-section">
+    <h3>Salary Income Details</h3>
+    <label for="basicSalary">Basic Salary (₹):
+      <input type="number" id="basicSalary" min="0" />
+    </label>
+    <label for="da">Dearness Allowance (DA) (Taxable) (₹):
+      <input type="number" id="da" min="0" value="0" />
+    </label>
+    <label for="hraReceived">House Rent Allowance (HRA) Received (₹):
+      <input type="number" id="hraReceived" min="0" />
+    </label>
+    <label for="rentPaid">Rent Paid (₹):
+      <input type="number" id="rentPaid" min="0" />
+    </label>
+    <label for="otherAllowances">Other Allowances (₹):
+      <input type="number" id="otherAllowances" min="0" value="0" />
+    </label>
+    <label for="metroCity">Residing in Metro City?
+      <select id="metroCity">
+        <option value="no" selected>No</option>
+        <option value="yes">Yes</option>
+      </select>
+    </label>
+  </div>
+
+  <!-- Freelance/Business Form -->
+  <div id="freelanceForm" class="form-section">
+    <h3>Freelance / Business Income Details</h3>
+    <label for="freelanceGross">Gross Receipts (₹):
+      <input type="number" id="freelanceGross" min="0" value="0" />
+    </label>
+    <label for="freelanceExpenses">Allowable Expenses (₹):
+      <input type="number" id="freelanceExpenses" min="0" value="0" />
+    </label>
+    <label for="presumptive">Use Presumptive Taxation (44ADA)?
+      <select id="presumptive">
+        <option value="yes">Yes</option>
+        <option value="no" selected>No</option>
+      </select>
+    </label>
+  </div>
+
+  <!-- Other Income Form -->
+  <div id="otherForm" class="form-section">
+    <h3>Other Income Details</h3>
+    <label for="otherIncome">Other Income Amount (₹):
+      <input type="number" id="otherIncome" min="0" value="0" />
+    </label>
+  </div>
+
+  <!-- Common Deductions -->
+  <div id="deductionsForm" class="form-section" style="display:block;">
+    <h3>Deductions</h3>
+    <label for="deductions80C">Section 80C (Max ₹1,50,000):
+      <input type="number" id="deductions80C" min="0" max="150000" value="0" />
+    </label>
+    <label for="deductions80CCD">Section 80CCD(1B) (Max ₹50,000):
+      <input type="number" id="deductions80CCD" min="0" max="50000" value="0" />
+    </label>
+    <label for="deductions80D">Section 80D (Max ₹25,000):
+      <input type="number" id="deductions80D" min="0" max="25000" value="0" />
+    </label>
+    <label for="deductions80E">Section 80E:
+      <input type="number" id="deductions80E" min="0" value="0" />
+    </label>
+    <label for="deductions24b">Section 24(b) (Max ₹2,00,000):
+      <input type="number" id="deductions24b" min="0" max="200000" value="0" />
+    </label>
+    <label for="deductions80TTA">Section 80TTA (Max ₹10,000):
+      <input type="number" id="deductions80TTA" min="0" max="10000" value="0" />
+    </label>
+    <label for="deductions80G">Section 80G:
+      <input type="number" id="deductions80G" min="0" value="0" />
+    </label>
+  </div>
+
+  <div style="text-align: center;">
+    <button type="button" onclick="calculateTax()">Calculate Tax</button>
+    <button type="button" onclick="downloadReport()">Download Report</button>
+    <button type="reset">Reset Form</button>
+  </div>
+</form>
+
+<div id="output" class="result"></div>
+
+<script>
+  const useSalary = document.getElementById("useSalary");
+  const useFreelance = document.getElementById("useFreelance");
+  const useOther = document.getElementById("useOther");
+
+  function updateFormVisibility() {
+    document.getElementById("salaryForm").style.display = useSalary.checked ? "block" : "none";
+    document.getElementById("freelanceForm").style.display = useFreelance.checked ? "block" : "none";
+    document.getElementById("otherForm").style.display = useOther.checked ? "block" : "none";
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    updateFormVisibility();
+    useSalary.addEventListener("change", updateFormVisibility);
+    useFreelance.addEventListener("change", updateFormVisibility);
+    useOther.addEventListener("change", updateFormVisibility);
+
+    document.getElementById("taxForm").addEventListener("reset", () => {
+      document.getElementById("output").textContent = "";
+    });
+  });
+
+  // Reuse your existing `calculateTax`, `calculateOldRegimeTaxDetailed`, `calculateNewRegimeTaxDetailed`, `downloadReport` functions here
+</script>
+
+<!-- 👇 Place your full JavaScript functions from your original script below this comment -->
+<!-- For brevity, they are omitted here since you've already written them -->
+
