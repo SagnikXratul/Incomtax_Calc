@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Capital Gains Calculator (AY 2025–26 with Indexation)</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 700px; margin: auto; padding: 20px; }
+    input, select { width: 100%; padding: 8px; margin: 6px 0; }
+    .result { font-weight: bold; margin-top: 20px; }
+    label { font-weight: bold; }
+    h2, h3 { border-bottom: 1px solid #ccc; padding-bottom: 5px; }
+  </style>
+</head>
+<body>
+  <h2>Capital Gains Calculator (AY 2025–26 with Indexation)</h2>
+
+  <!-- Basic Details Section -->
+  <h3>1. Basic Details</h3>
+  <label>Name of Assessee:</label>
+  <input type="text" id="name">
+
+  <label>PAN:</label>
+  <input type="text" id="pan">
+
+  <label>Financial Year:</label>
+  <input type="text" id="fy" value="2024–25">
+
+  <label>Assessment Year:</label>
+  <input type="text" id="ay" value="2025–26">
+
+  <!-- Transaction Section -->
+  <h3>2. Transaction Details</h3>
+
+  <label>Type of Asset:</label>
+  <select id="assetType">
+    <option value="equity">Listed Equity / Equity MF</option>
+    <option value="property">Property</option>
+    <option value="gold">Gold</option>
+    <option value="other">Other</option>
+  </select>
+
+  <label>Purchase Date:</label>
+  <input type="date" id="purchaseDate" required>
+
+  <label>Sale Date:</label>
+  <input type="date" id="saleDate" required>
+
+  <label>Purchase Cost (₹):</label>
+  <input type="number" id="purchaseCost" required>
+
+  <label>Sale Price (₹):</label>
+  <input type="number" id="salePrice" required>
+
+  <label>Transfer Expenses (₹):</label>
+  <input type="number" id="expenses" value="0">
+
+  <label>Slab Rate for STCG (non-equity):</label>
+  <input type="number" id="slabRate" value="30">
+
+  <label>LTCG Tax Rate (non-equity):</label>
+  <input type="number" id="ltcgRateOther" value="12.5">
+
+  <button onclick="calculate()">Calculate Capital Gains</button>
+
+  <div class="result" id="output"></div>
+
+  <script>
+    const CII = {
+      2001: 100, 2002: 105, 2003: 109, 2004: 113, 2005: 117, 2006: 122,
+      2007: 129, 2008: 137, 2009: 148, 2010: 167, 2011: 184, 2012: 200,
+      2013: 220, 2014: 240, 2015: 254, 2016: 264, 2017: 272, 2018: 280,
+      2019: 289, 2020: 301, 2021: 317, 2022: 331, 2023: 348, 2024: 363
+    };
+
+    function calculate() {
+      const name = document.getElementById('name').value;
+      const pan = document.getElementById('pan').value;
+      const fy = document.getElementById('fy').value;
+      const ay = document.getElementById('ay').value;
+
+      const asset = document.getElementById('assetType').value;
+      const purchaseDate = new Date(document.getElementById('purchaseDate').value);
+      const saleDate = new Date(document.getElementById('saleDate').value);
+      const purchaseCost = parseFloat(document.getElementById('purchaseCost').value);
+      const salePrice = parseFloat(document.getElementById('salePrice').value);
+      const expenses = parseFloat(document.getElementById('expenses').value);
+      const slabRate = parseFloat(document.getElementById('slabRate').value);
+      const ltcgRateOther = parseFloat(document.getElementById('ltcgRateOther').value);
+
+      const netSale = salePrice - expenses;
+      const holdingMonths = (saleDate - purchaseDate) / (1000 * 60 * 60 * 24 * 30.44);
+      const purchaseYear = purchaseDate.getFullYear();
+      const saleYear = 2024; // Fixed for AY 2025–26
+
+      const ciiPurchase = CII[purchaseYear] || 100;
+      const ciiSale = CII[saleYear] || 363;
+      const indexedCost = asset === 'equity' ? purchaseCost : (purchaseCost * ciiSale / ciiPurchase).toFixed(2);
+
+      let gainType = '';
+      let gainAmount = 0;
+      let tax = 0;
+      let taxRate = 0;
+
+      if (asset === 'equity') {
+        gainType = holdingMonths > 12 ? 'LTCG' : 'STCG';
+        gainAmount = netSale - purchaseCost;
+        if (gainType === 'LTCG') {
+          const exemption = 125000;
+          const taxable = Math.max(0, gainAmount - exemption);
+          taxRate = 12.5;
+          tax = taxable * (taxRate / 100);
+        } else {
+          taxRate = 20;
+          tax = gainAmount * (taxRate / 100);
+        }
+      } else {
+        gainType = holdingMonths > 24 ? 'LTCG' : 'STCG';
+        if (gainType === 'LTCG') {
+          gainAmount = netSale - indexedCost;
+          taxRate = ltcgRateOther;
+          tax = gainAmount * (taxRate / 100);
+        } else {
+          gainAmount = netSale - purchaseCost;
+          taxRate = slabRate;
+          tax = gainAmount * (taxRate / 100);
+        }
+      }
+
+      document.getElementById('output').innerHTML = `
+        <h3>Calculation Result</h3>
+        <b>Name:</b> ${name || "—"}<br>
+        <b>PAN:</b> ${pan || "—"}<br>
+        <b>Financial Year:</b> ${fy || "—"}<br>
+        <b>Assessment Year:</b> ${ay || "—"}<br><br>
+
+        Holding Period: ${holdingMonths.toFixed(1)} months<br>
+        Purchase Year CII: ${ciiPurchase}<br>
+        Sale Year CII: ${ciiSale}<br>
+        Indexed Cost: ₹${parseFloat(indexedCost).toFixed(2)}<br><br>
+
+        Capital Gain Type: <strong>${gainType}</strong><br>
+        Gain Amount: ₹${gainAmount.toFixed(2)}<br>
+        Tax Rate: ${taxRate}%<br>
+        <span style="color:green">Capital Gains Tax Payable: ₹${tax.toFixed(2)}</span>
+      `;
+    }
+  </script>
+</body>
+</html>
